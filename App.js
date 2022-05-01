@@ -1,76 +1,27 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import 'react-native-gesture-handler';
+import React from 'react';
 
-import React, {useEffect, useState} from 'react';
-import {SafeAreaView, Text, View, StatusBar, StyleSheet} from 'react-native';
-import {Button} from 'react-native-paper';
-import TextRecognition from 'react-native-text-recognition';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {NavigationContainer} from '@react-navigation/native';
+import Home from './Home';
 
-const App = () => {
-  const [image, setImage] = useState(null);
-  const [text, setText] = useState(null);
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-  // useEffect(() => {
-  //   launchImageLibrary({}, setImage);
-  // }, []);
+const Drawer = createDrawerNavigator();
 
-  const buttonPress = () => {
-    launchImageLibrary({}, setImage);
-  };
-
-  useEffect(() => {
-    (async () => {
-      if (image) {
-        const result = await TextRecognition.recognize(image.assets[0].uri);
-        console.log(result);
-        setText(result);
-      }
-    })();
-  }, [image]);
-
+export default function App() {
   return (
-    <SafeAreaView>
-      <StatusBar />
-      <View>
-        {/* <Text>{text}</Text> */}
-        <Button style={styles.button} onPress={buttonPress}>
-          <Text style={styles.textInButton}>Select image from device</Text>
-        </Button>
-        <Button style={styles.buttonTakePicture} onPress={buttonPress}>
-          <Text style={styles.textInButton}>Take photo</Text>
-        </Button>
-      </View>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Drawer.Navigator initialRoute="Home">
+        <Drawer.Screen
+          name="Home"
+          component={Home}
+          options={{
+            drawerIcon: config => <Icon size={23} name="home" />,
+          }}
+        />
+        {/* <Drawer.Screen name="CameraComponent" component={CameraComponent} /> */}
+      </Drawer.Navigator>
+    </NavigationContainer>
   );
-};
-
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: 'green',
-    margin: 10,
-    width: '90%',
-    height: '30%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonTakePicture: {
-    backgroundColor: 'blue',
-    margin: 10,
-    width: '90%',
-    height: '30%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  textInButton: {
-    color: '#fff',
-    fontSize: 15,
-  },
-});
-
-export default App;
+}
