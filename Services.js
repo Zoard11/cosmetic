@@ -44,7 +44,7 @@ export async function getIngredientEffect(url) {
       const effect = $(
         'body > section:nth-child(3) > div > div > div > div.content-fleur.my-3 > div > span',
       ).text();
-        // console.log(effect);
+      // console.log(effect);
       return effect;
     })
     .catch(error => {
