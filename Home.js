@@ -45,7 +45,14 @@ const Home = () => {
   };
 
   const buttonPress2 = () => {
-    launchCamera({}, setImage);
+    const options = {
+      saveToPhotos: true,
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+    launchCamera(options, setImage);
   };
 
   useEffect(() => {
@@ -76,7 +83,6 @@ const Home = () => {
     <SafeAreaView>
       <StatusBar />
       <View>
-        {/* <Text>{text}</Text> */}
         <Button style={styles.button} onPress={buttonPress}>
           <Text style={styles.textInButton}>Select image from device</Text>
         </Button>
