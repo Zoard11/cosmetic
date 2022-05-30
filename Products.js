@@ -33,7 +33,6 @@ const Procucts = () => {
     setIngredients,
     products,
     setProducts,
-    refresh,
     activeProduct,
     setActiveProduct,
     productIngredients,
@@ -45,7 +44,7 @@ const Procucts = () => {
       .then(result => {
         setProducts(result);
         console.log('products:');
-        console.log(products); 
+        console.log(products);
       })
       .catch(error => {
         console.log(`Unable to load data: ${error.message}`);
@@ -154,15 +153,19 @@ const Procucts = () => {
               }}>
               <View style={styles.productRows}>
                 <Text style={styles.productName}>{e.fileName}</Text>
-                <View style={styles.rightSide}>
-                  <AirbnbRating
-                    type="star"
-                    ratingCount={5}
-                    defaultRating={e.rating}
-                    showRating={false}
-                    isDisabled={true}
-                  />
-                </View>
+                {e.rating > 0 ? (
+                  <View style={styles.rightSide}>
+                    <AirbnbRating
+                      type="star"
+                      ratingCount={5}
+                      defaultRating={e.rating}
+                      showRating={false}
+                      isDisabled={true}
+                    />
+                  </View>
+                ) : (
+                  <View style={styles.rightSide} />
+                )}
               </View>
             </TouchableOpacity>
           );

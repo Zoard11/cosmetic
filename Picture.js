@@ -76,7 +76,6 @@ const Picture = ({navigation}) => {
     setCategories,
     selectedCategory,
     setSelectedCategory,
-    handleRefresh,
   } = useBetween(useShareableState);
 
   const [image2, setImage2] = useState(null);
@@ -121,6 +120,9 @@ const Picture = ({navigation}) => {
       onChangeDescription('');
       onChangeText('');
     };
+    const txtPath = `/storage/emulated/0/Documents/cosmetics/${selectedCategory}`;
+
+    console.log(txtPath);
 
     return RNFS.mkdir(albumPath)
       .then(() => {
@@ -136,6 +138,24 @@ const Picture = ({navigation}) => {
               RNFS.scanFile(filePathInAlbum2);
             }
           })
+          .then(() => RNFS.mkdir(txtPath))
+          .then(() => {
+            let message = productName + '\nIngredients:';
+
+            ingredients.forEach(ingredient => {
+              message += ingredient['INCI name'] + ',';
+              console.log(ingredient);
+            });
+
+            message = message.slice(0, -1);
+            message += '.';
+
+            const path = `${txtPath}/${productName}.txt`;
+            RNFS.writeFile(path, message, 'utf8');
+          })
+          .then(success => {
+            console.log('FILE WRITTEN!');
+          })
           .then(() => {
             saveAllData(
               productName,
@@ -147,7 +167,6 @@ const Picture = ({navigation}) => {
               description,
             ).then(
               function () {
-                handleRefresh();
                 clearAllVariables();
                 console.log('File Saved Successfully!');
                 Alert.alert(
@@ -203,8 +222,6 @@ const Picture = ({navigation}) => {
     selectCategories()
       .then(result => {
         setCategories(result);
-        console.log('categories:');
-        console.log(categories);
         if (categories._W) {
           setLocalCategories(categories._W);
         } else {
@@ -290,7 +307,6 @@ const Picture = ({navigation}) => {
                   value="0"
                 />
                 {localCategories.map(e => {
-                  console.log(e);
                   return (
                     <Picker.Item
                       label={e.CategoryName}

@@ -8,12 +8,7 @@ export const useShareableState = () => {
   const [selectedCategory, setSelectedCategory] = useState();
   const [products, setProducts] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
-  const [refresh, setRefresh] = useState(false);
   const [productIngredients, setProductIngredients] = useState([]);
-
-  const handleRefresh = () => {
-    setRefresh(() => !refresh);
-  };
 
   return {
     image,
@@ -26,9 +21,6 @@ export const useShareableState = () => {
     setSelectedCategory,
     products,
     setProducts,
-    refresh,
-    setRefresh,
-    handleRefresh,
     activeProduct,
     setActiveProduct,
     productIngredients,
