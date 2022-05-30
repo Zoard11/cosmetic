@@ -21,6 +21,9 @@ import {useShareableState} from './SharedVariables';
 import Modal from 'react-native-modal';
 import {ScrollView} from 'react-native-gesture-handler';
 import {getProducts, getProductIngredientsLocal} from './Database';
+import SwiperFlatList from 'react-native-swiper-flatlist';
+import {Rating, AirbnbRating} from 'react-native-ratings';
+import {black} from 'react-native-paper/lib/typescript/styles/colors';
 
 const Procucts = () => {
   const {
@@ -33,8 +36,6 @@ const Procucts = () => {
     refresh,
     activeProduct,
     setActiveProduct,
-    activeProductName,
-    setActiveProductName,
     productIngredients,
     setProductIngredients,
   } = useBetween(useShareableState);
@@ -43,25 +44,13 @@ const Procucts = () => {
     getProducts()
       .then(result => {
         setProducts(result);
-        console.log('EREDMENYEK:');
-        console.log(products);
+        console.log('products:');
+        console.log(products); 
       })
       .catch(error => {
         console.log(`Unable to load data: ${error.message}`);
       });
   }, []);
-
-  useEffect(() => {
-    getProducts()
-      .then(result => {
-        setProducts(result);
-        console.log('EREDMENYEK:');
-        console.log(products);
-      })
-      .catch(error => {
-        console.log(`Unable to load data: ${error.message}`);
-      });
-  }, [refresh]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -78,28 +67,67 @@ const Procucts = () => {
         <Modal isVisible={isModalVisible}>
           <View style={styles.modalstyle}>
             {activeProduct ? (
-              <View style={styles.modalInside}>
-                <Text style={styles.title}>Name : {activeProductName}</Text>
-                <Text style={styles.title}>Picture</Text>
-                <View style={styles.container}>
-                  <Image
-                    source={{uri: 'file://' + activeProduct.filePathInAlbum}}
-                    style={styles.image}
-                  />
+              <ScrollView contentContainerStyle={styles.contentContainer}>
+                <View style={styles.modalInside}>
+                  <Text style={styles.title}>
+                    Name : {activeProduct.fileName}
+                  </Text>
+                  <View>
+                    <Text style={styles.title}>
+                      Category : {activeProduct.Category}
+                    </Text>
+                  </View>
+                  <Text style={styles.title}>Pictures</Text>
+                  <View style={styles.container}>
+                    {activeProduct.filePathInAlbum2 !== '' ? (
+                      <SwiperFlatList
+                        autoplay
+                        autoplayDelay={5}
+                        autoplayLoop
+                        index={1}
+                        showPagination>
+                        <Image
+                          source={{
+                            uri: 'file://' + activeProduct.filePathInAlbum,
+                          }}
+                          style={styles.imageInSwiper}
+                        />
+                        <Image
+                          source={{
+                            uri: 'file://' + activeProduct.filePathInAlbum2,
+                          }}
+                          style={styles.imageInSwiper}
+                        />
+                      </SwiperFlatList>
+                    ) : (
+                      <Image
+                        source={{
+                          uri: 'file://' + activeProduct.filePathInAlbum,
+                        }}
+                        style={styles.image}
+                      />
+                    )}
+                  </View>
+                  <DataTable>
+                    <Text style={styles.title}>Ingredients</Text>
+                    {productIngredients.map(e => {
+                      return (
+                        <DataTable.Row key={e.id}>
+                          <DataTable.Cell>
+                            <Text>{e['INCI name']}</Text>
+                          </DataTable.Cell>
+                        </DataTable.Row>
+                      );
+                    })}
+                  </DataTable>
+                  <View>
+                    <Text style={styles.title}>Description</Text>
+                    <Text style={styles.description}>
+                      {activeProduct.description}
+                    </Text>
+                  </View>
                 </View>
-                <DataTable>
-                  <Text style={styles.title}>Ingredients</Text>
-                  {productIngredients.map(e => {
-                    return (
-                      <DataTable.Row key={e.id}>
-                        <DataTable.Cell>
-                          <Text>{e['INCI name']}</Text>
-                        </DataTable.Cell>
-                      </DataTable.Row>
-                    );
-                  })}
-                </DataTable>
-              </View>
+              </ScrollView>
             ) : (
               <Button />
             )}
@@ -110,31 +138,35 @@ const Procucts = () => {
           </View>
         </Modal>
 
-        <DataTable>
-          {products.map(e => {
-            return (
-              <TouchableOpacity
-                key={e.productId}
-                onPress={async () => {
-                  setIsModalVisible(!isModalVisible);
-                  setActiveProduct(e);
-                  setActiveProductName(e.fileName);
-                  const result = await getProductIngredientsLocal(e.productId);
-                  console.log(result);
-                  console.log(e);
-                  console.log('Source:');
-                  console.log(activeProduct.filePathInAlbum);
-                  setProductIngredients(result);
-                }}>
-                <DataTable.Row key={e.productId}>
-                  <DataTable.Cell>
-                    <Text>{e.fileName}</Text>
-                  </DataTable.Cell>
-                </DataTable.Row>
-              </TouchableOpacity>
-            );
-          })}
-        </DataTable>
+        {products.map(e => {
+          return (
+            <TouchableOpacity
+              key={e.productId}
+              onPress={async () => {
+                handleModal();
+                setActiveProduct(e);
+                const result = await getProductIngredientsLocal(e.productId);
+                console.log(result);
+                console.log(e);
+                console.log('Source:');
+                console.log(activeProduct.filePathInAlbum);
+                setProductIngredients(result);
+              }}>
+              <View style={styles.productRows}>
+                <Text style={styles.productName}>{e.fileName}</Text>
+                <View style={styles.rightSide}>
+                  <AirbnbRating
+                    type="star"
+                    ratingCount={5}
+                    defaultRating={e.rating}
+                    showRating={false}
+                    isDisabled={true}
+                  />
+                </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -185,13 +217,35 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '80%',
-    height: '40%',
+    height: '50%',
     margin: 10,
   },
   image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+  },
+  contentContainer: {
+    paddingBottom: 1100,
+  },
+  imageInSwiper: {
+    width: 230,
+    height: 300,
+  },
+  productRows: {
+    margin: 20,
+    flexDirection: 'row',
+  },
+  rightSide: {
+    alignItems: 'flex-end',
+  },
+  productName: {
+    margin: 10,
+  },
+  description: {
+    fontSize: 15,
+    margin: 10,
+    color: 'black',
   },
 });
 

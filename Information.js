@@ -38,24 +38,34 @@ const Information = () => {
         <Modal isVisible={isModalVisible}>
           <View style={styles.modalstyle}>
             {activeIngredient ? (
-              <View style={styles.modalInside}>
-                <Text style={styles.title}>Name</Text>
-                <Text>{activeIngredient['INCI name']}</Text>
-                <Text style={styles.title}>Description</Text>
-                <Text>{activeIngredient['Chem/IUPAC Name / Description']}</Text>
-                <Text style={styles.title}>Function</Text>
-                <Text>{activeIngredient.Function}</Text>
-                <Text style={styles.title}>Restriction</Text>
-                <Text>{activeIngredient.Restriction}</Text>
-                <Text style={styles.title}>Update Date</Text>
-                <Text>{activeIngredient['Update Date']}</Text>
-              </View>
+              <ScrollView>
+                <View style={styles.modalInside}>
+                  <Text style={styles.title}>Name</Text>
+                  <Text style={styles.text}>
+                    {activeIngredient['INCI name']}
+                  </Text>
+                  <Text style={styles.title}>Description</Text>
+                  <Text style={styles.text}>
+                    {activeIngredient['Chem/IUPAC Name / Description']}
+                  </Text>
+                  <Text style={styles.title}>Function</Text>
+                  <Text style={styles.text}>{activeIngredient.Function}</Text>
+                  <Text style={styles.title}>Restriction</Text>
+                  <Text style={styles.text}>
+                    {activeIngredient.Restriction}
+                  </Text>
+                  <Text style={styles.title}>Update Date</Text>
+                  <Text style={styles.text}>
+                    {activeIngredient['Update Date']}
+                  </Text>
+                </View>
+              </ScrollView>
             ) : (
               <Button />
             )}
 
-            <Button style={styles.cancelButton} onPress={handleModal}>
-              <Text style={styles.textInButton}>Cancel</Text>
+            <Button style={styles.OkButton} onPress={handleModal}>
+              <Text style={styles.textInButton}>OK</Text>
             </Button>
           </View>
         </Modal>
@@ -104,12 +114,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
   },
-  cancelButton: {
+  OkButton: {
     backgroundColor: 'green',
-    margin: 10,
+    margin: 20,
     width: '40%',
     justifyContent: 'center',
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   modalstyle: {
     backgroundColor: 'white',
@@ -123,6 +133,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
+    margin: 10,
+    color: 'black',
+  },
+  text: {
+    fontSize: 15,
     margin: 10,
     color: 'black',
   },

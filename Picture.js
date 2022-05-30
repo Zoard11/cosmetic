@@ -24,10 +24,17 @@ import {useBetween} from 'use-between';
 import {useShareableState} from './SharedVariables';
 import RNPickerSelect from 'react-native-picker-select';
 import {Picker} from '@react-native-picker/picker';
-import {ScrollView} from 'react-native-gesture-handler';
+import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
 import RNFS from 'react-native-fs';
 import CameraRoll from '@react-native-community/cameraroll';
-import {saveAllData} from './Database';
+import {addNewCategory, saveAllData, selectCategories} from './Database';
+import {Dimensions} from 'react-native';
+import {Rating, AirbnbRating} from 'react-native-ratings';
+import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import Modal from 'react-native-modal';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const Picture = ({navigation}) => {
   const getPermissionAndroid = async () => {
@@ -72,6 +79,19 @@ const Picture = ({navigation}) => {
     handleRefresh,
   } = useBetween(useShareableState);
 
+  const [image2, setImage2] = useState(null);
+
+  const [text, onChangeText] = useState('');
+  const [rating, setRating] = useState('');
+  const [description, onChangeDescription] = useState('');
+
+  const [textNewCategory, onChangeTextNewCategory] = useState('');
+  const [localCategories, setLocalCategories] = useState([]);
+
+  const navigateToProductsPage = () => {
+    navigation.navigate('Products');
+  };
+
   const saveFile = () => {
     const granted = getPermissionAndroid();
     if (!granted) {
@@ -85,27 +105,74 @@ const Picture = ({navigation}) => {
     const fileName = `${productName}.jpg`;
     const filePathInCache = image.assets[0].uri;
     const filePathInAlbum = `${albumPath}/${fileName}`;
+    let filePathInCache2 = '';
+    let filePathInAlbum2 = '';
+
+    if (image2) {
+      const fileName2 = `${productName}2.jpg`;
+      filePathInCache2 = image2.assets[0].uri;
+      filePathInAlbum2 = `${albumPath}/${fileName2}`;
+    }
+
+    const clearAllVariables = () => {
+      setRating('');
+      setImage2(null);
+      setImage(null);
+      onChangeDescription('');
+      onChangeText('');
+    };
 
     return RNFS.mkdir(albumPath)
       .then(() => {
         RNFS.copyFile(filePathInCache, filePathInAlbum)
+          .then(() => {
+            if (image2) {
+              RNFS.copyFile(filePathInCache2, filePathInAlbum2);
+            }
+          })
           .then(() => RNFS.scanFile(filePathInAlbum))
+          .then(() => {
+            if (image2) {
+              RNFS.scanFile(filePathInAlbum2);
+            }
+          })
           .then(() => {
             saveAllData(
               productName,
               filePathInAlbum,
               selectedCategory,
               ingredients,
-            );
-            handleRefresh();
-          })
-          .then(() => {
-            console.log('File Saved Successfully!');
-            Alert.alert(
-              'Save Image',
-              'Image Saved Successfully',
-              [{text: 'OK', onPress: () => console.log('OK Pressed')}],
-              {cancelable: false},
+              rating,
+              filePathInAlbum2,
+              description,
+            ).then(
+              function () {
+                handleRefresh();
+                clearAllVariables();
+                console.log('File Saved Successfully!');
+                Alert.alert(
+                  'Save Image',
+                  'Image Saved Successfully',
+                  [
+                    {
+                      text: 'OK',
+                      onPress: () => {
+                        console.log('OK Pressed');
+                        navigateToProductsPage();
+                      },
+                    },
+                  ],
+                  {cancelable: false},
+                );
+              },
+              function (error) {
+                Alert.alert(
+                  'Error',
+                  'Image failed to save',
+                  [{text: 'OK', onPress: () => console.log('OK Pressed')}],
+                  {cancelable: false},
+                );
+              },
             );
           });
       })
@@ -114,64 +181,190 @@ const Picture = ({navigation}) => {
       });
   };
 
-  if (image) {
-    console.log(image.assets[0].uri);
-    console.log(selectedCategory);
-  }
+  const ratingCompleted = selectedRating => {
+    setRating(selectedRating);
+  };
+  const buttonPressImageFromDevice = () => {
+    launchImageLibrary({}, setImage2);
+  };
 
-  const [text, onChangeText] = useState('');
+  const buttonPressTakePicture = () => {
+    const options = {
+      // saveToPhotos: true,
+      // storageOptions: {
+      //   skipBackup: true,
+      //   path: 'images',
+      // },
+    };
+    launchCamera(options, setImage2);
+  };
+
+  useEffect(() => {
+    selectCategories()
+      .then(result => {
+        setCategories(result);
+        console.log('categories:');
+        console.log(categories);
+        if (categories._W) {
+          setLocalCategories(categories._W);
+        } else {
+          setLocalCategories(categories);
+        }
+      })
+      .catch(error => {
+        console.log(`Unable to load data: ${error.message}`);
+      });
+  }, []);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleModal = () => {
+    setIsModalVisible(() => !isModalVisible);
+  };
 
   return (
     <SafeAreaView>
       <StatusBar />
-      {image ? (
-        <View style={styles.all}>
-          <View style={styles.container}>
-            <Image source={image.assets} style={styles.image} />
-          </View>
 
-          <View style={{height: '20%', width: '100%'}}>
-            <Text style={styles.textSelectCategory}>Select Category </Text>
-            <Picker
-              style={{flex: 1}}
-              selectedValue={selectedCategory}
-              onValueChange={(itemValue, itemIndexs) => {
-                if (itemIndexs !== 0) {
-                  setSelectedCategory(itemValue);
-                }
-              }}>
-              <Picker.Item
-                label="Please select an option..."
-                key="0"
-                value="0"
-              />
-              {categories.map(e => {
-                return <Picker.Item label={e} value={e} key={e} />;
-              })}
-            </Picker>
-          </View>
+      <Modal isVisible={isModalVisible}>
+        <View style={styles.modalstyle}>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
-            placeholder="Product name"
+            onChangeText={onChangeTextNewCategory}
+            value={textNewCategory}
+            placeholder="Category name"
           />
-          <View>
-            <Button style={styles.button} onPress={saveFile}>
-              <Text style={styles.textInButton}>Save </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              margin: 10,
+              justifyContent: 'flex-end',
+            }}>
+            <Button
+              style={styles.OkButton}
+              onPress={async () => {
+                await addNewCategory(textNewCategory);
+                setCategories(await selectCategories());
+                setLocalCategories(categories);
+                setLocalCategories(localCategories => [
+                  ...localCategories,
+                  {CategoryName: textNewCategory},
+                ]);
+                onChangeTextNewCategory('');
+                handleModal();
+              }}>
+              <Text style={styles.textInButton}>OK</Text>
+            </Button>
+            <Button style={styles.cancelButton} onPress={handleModal}>
+              <Text style={styles.textInButton}>Cancel</Text>
             </Button>
           </View>
         </View>
-      ) : (
-        <Button />
-      )}
+      </Modal>
+
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        {image ? (
+          <View style={styles.all}>
+            <View style={styles.container}>
+              <Image source={image.assets} style={styles.image} />
+            </View>
+
+            <View style={{height: '20%', width: '100%'}}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.h2}>Select Category </Text>
+                <TouchableOpacity onPress={handleModal}>
+                  <Text style={styles.h2}>Add new category </Text>
+                </TouchableOpacity>
+              </View>
+              <Picker
+                style={{flex: 1}}
+                selectedValue={selectedCategory}
+                onValueChange={(itemValue, itemIndexs) => {
+                  if (itemIndexs !== 0) {
+                    setSelectedCategory(itemValue);
+                  }
+                }}>
+                <Picker.Item
+                  label="Please select an option..."
+                  key="0"
+                  value="0"
+                />
+                {localCategories.map(e => {
+                  console.log(e);
+                  return (
+                    <Picker.Item
+                      label={e.CategoryName}
+                      value={e.CategoryName}
+                      key={e.CategoryName}
+                    />
+                  );
+                })}
+              </Picker>
+            </View>
+            <Text style={styles.h2}>Name </Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangeText}
+              value={text}
+              placeholder="Product name"
+            />
+
+            <Text style={styles.h2}>Description </Text>
+            <View style={styles.textAreaContainer}>
+              <TextInput
+                style={styles.textArea}
+                underlineColorAndroid="transparent"
+                placeholder="Type something"
+                placeholderTextColor="grey"
+                numberOfLines={10}
+                multiline={true}
+                onChangeText={onChangeDescription}
+              />
+            </View>
+
+            <Text style={styles.h2}>Rating </Text>
+            <AirbnbRating onFinishRating={ratingCompleted} />
+            <View>
+              <Text style={styles.h2}>Add another picture </Text>
+              {image2 ? (
+                <View style={styles.container}>
+                  <Image source={image2.assets} style={styles.image} />
+                </View>
+              ) : (
+                <Button />
+              )}
+            </View>
+            <View>
+              <Button
+                style={styles.buttonAddPicture}
+                onPress={buttonPressImageFromDevice}>
+                <Text style={styles.textInButton}>
+                  Select image from device
+                </Text>
+              </Button>
+              <Button
+                style={styles.buttonAddPicture}
+                onPress={buttonPressTakePicture}>
+                <Text style={styles.textInButton}>Take photo</Text>
+              </Button>
+            </View>
+            <View>
+              <Button style={styles.button} onPress={saveFile}>
+                <Text style={styles.textInButton}>Save </Text>
+              </Button>
+            </View>
+          </View>
+        ) : (
+          <Button />
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: 'green',
     margin: 10,
     width: '90%',
     height: '40%',
@@ -183,13 +376,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   container: {
-    width: '90%',
-    height: '50%',
+    width: windowWidth * 0.9,
+    height: windowHeight * 0.5,
     margin: 10,
   },
   all: {
-    width: '100%',
-    height: '100%',
+    width: windowWidth * 1,
+    height: windowHeight * 1,
   },
   image: {
     width: '100%',
@@ -212,14 +405,59 @@ const styles = StyleSheet.create({
     color: 'black',
     paddingRight: 30,
   },
-  textSelectCategory: {
+  h2: {
     color: 'black',
     margin: 10,
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   input: {
     margin: 10,
+  },
+  textAreaContainer: {
+    margin: 10,
+    borderColor: 'grey',
+    borderWidth: 2,
+    padding: 5,
+  },
+  textArea: {
+    height: 150,
+    justifyContent: 'flex-start',
+  },
+  contentContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'lightgrey',
+    paddingBottom: 1100,
+  },
+  buttonAddPicture: {
+    backgroundColor: 'blue',
+    margin: 10,
+    width: windowWidth * 0.9,
+    height: windowHeight * 0.09,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalstyle: {
+    backgroundColor: 'white',
+    height: '35%',
+    width: '95%',
+    borderRadius: 10,
+    flexDirection: 'column',
+  },
+  OkButton: {
+    backgroundColor: 'green',
+    margin: 20,
+    width: '40%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: 'red',
+    margin: 20,
+    width: '40%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

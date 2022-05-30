@@ -1,13 +1,13 @@
 import {useState} from 'react';
+import {selectCategories} from './Database';
 
 export const useShareableState = () => {
   const [image, setImage] = useState(null);
   const [ingredients, setIngredients] = useState([]);
-  const [categories, setCategories] = useState(['sampon1', 'kezkrem1']);
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState();
   const [products, setProducts] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
-  const [activeProductName, setActiveProductName] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [productIngredients, setProductIngredients] = useState([]);
 
@@ -31,8 +31,6 @@ export const useShareableState = () => {
     handleRefresh,
     activeProduct,
     setActiveProduct,
-    activeProductName,
-    setActiveProductName,
     productIngredients,
     setProductIngredients,
   };

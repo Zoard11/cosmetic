@@ -9,11 +9,10 @@ export function getInformation(name_with_spaces) {
   )
     .then(response => response.json())
     .then(response => {
-
       return response;
     })
     .catch(error => {
       console.log('Error occurred during fetch operation: ', error.message);
-      throw new Error(error.message); 
+      throw new Error(error.message);
     });
 }
