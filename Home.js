@@ -16,7 +16,8 @@ import {useBetween} from 'use-between';
 import {useShareableState} from './SharedVariables';
 
 const Home = ({navigation}) => {
-  const {image, setImage, setIngredients} = useBetween(useShareableState);
+  const {image, setImage, setIngredients, setActiveProduct} =
+    useBetween(useShareableState);
 
   let localIngredients = [];
 
@@ -79,6 +80,7 @@ const Home = ({navigation}) => {
         console.log(image);
         setIngredients(localIngredients);
         navigateToInformationPage();
+        setActiveProduct(null);
       }
     })();
   }, [image]);

@@ -55,7 +55,7 @@ const db = SQLite.openDatabase(
       error => {
         console.log('Transaction error');
         console.log(error);
-      }, 
+      },
     );
   },
   error => {
@@ -184,6 +184,7 @@ export function selectCategories() {
                 rows.push(results.rows.item(i));
                 // console.log(row);
               }
+              console.log(rows);
               return resolve(rows);
             },
           );

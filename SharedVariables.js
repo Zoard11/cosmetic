@@ -9,6 +9,7 @@ export const useShareableState = () => {
   const [products, setProducts] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
   const [productIngredients, setProductIngredients] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
   return {
     image,
@@ -25,5 +26,7 @@ export const useShareableState = () => {
     setActiveProduct,
     productIngredients,
     setProductIngredients,
+    refresh,
+    setRefresh,
   };
 };

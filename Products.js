@@ -25,7 +25,7 @@ import SwiperFlatList from 'react-native-swiper-flatlist';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import {black} from 'react-native-paper/lib/typescript/styles/colors';
 
-const Procucts = () => {
+const Products = ({navigation}) => {
   const {
     image,
     setImage,
@@ -37,6 +37,7 @@ const Procucts = () => {
     setActiveProduct,
     productIngredients,
     setProductIngredients,
+    refresh,
   } = useBetween(useShareableState);
 
   useEffect(() => {
@@ -49,12 +50,17 @@ const Procucts = () => {
       .catch(error => {
         console.log(`Unable to load data: ${error.message}`);
       });
-  }, []);
+  }, [refresh]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [localActiveProduct, setLocalActiveProduct] = useState(null);
 
   const handleModal = () => {
     setIsModalVisible(() => !isModalVisible);
+  };
+
+  const navigateToInformationPage = () => {
+    navigation.navigate('Information');
   };
 
   return (
@@ -65,20 +71,20 @@ const Procucts = () => {
 
         <Modal isVisible={isModalVisible}>
           <View style={styles.modalstyle}>
-            {activeProduct ? (
+            {localActiveProduct ? (
               <ScrollView contentContainerStyle={styles.contentContainer}>
                 <View style={styles.modalInside}>
                   <Text style={styles.title}>
-                    Name : {activeProduct.fileName}
+                    Name : {localActiveProduct.fileName}
                   </Text>
                   <View>
                     <Text style={styles.title}>
-                      Category : {activeProduct.Category}
+                      Category : {localActiveProduct.Category}
                     </Text>
                   </View>
                   <Text style={styles.title}>Pictures</Text>
                   <View style={styles.container}>
-                    {activeProduct.filePathInAlbum2 !== '' ? (
+                    {localActiveProduct.filePathInAlbum2 !== '' ? (
                       <SwiperFlatList
                         autoplay
                         autoplayDelay={5}
@@ -87,13 +93,14 @@ const Procucts = () => {
                         showPagination>
                         <Image
                           source={{
-                            uri: 'file://' + activeProduct.filePathInAlbum,
+                            uri: 'file://' + localActiveProduct.filePathInAlbum,
                           }}
                           style={styles.imageInSwiper}
                         />
                         <Image
                           source={{
-                            uri: 'file://' + activeProduct.filePathInAlbum2,
+                            uri:
+                              'file://' + localActiveProduct.filePathInAlbum2,
                           }}
                           style={styles.imageInSwiper}
                         />
@@ -101,7 +108,7 @@ const Procucts = () => {
                     ) : (
                       <Image
                         source={{
-                          uri: 'file://' + activeProduct.filePathInAlbum,
+                          uri: 'file://' + localActiveProduct.filePathInAlbum,
                         }}
                         style={styles.image}
                       />
@@ -122,7 +129,7 @@ const Procucts = () => {
                   <View>
                     <Text style={styles.title}>Description</Text>
                     <Text style={styles.description}>
-                      {activeProduct.description}
+                      {localActiveProduct.description}
                     </Text>
                   </View>
                 </View>
@@ -131,9 +138,21 @@ const Procucts = () => {
               <Button />
             )}
 
-            <Button style={styles.cancelButton} onPress={handleModal}>
-              <Text style={styles.textInButton}>Cancel</Text>
-            </Button>
+            <View style={styles.buttonContainer}>
+              <Button style={styles.cancelButton} onPress={handleModal}>
+                <Text style={styles.textInButton}>Cancel</Text>
+              </Button>
+              <Button
+                style={styles.setActiveButton}
+                onPress={() => {
+                  handleModal();
+                  setActiveProduct(localActiveProduct);
+                  console.log(localActiveProduct);
+                  navigateToInformationPage();
+                }}>
+                <Text style={styles.textInButton}>set active</Text>
+              </Button>
+            </View>
           </View>
         </Modal>
 
@@ -143,12 +162,12 @@ const Procucts = () => {
               key={e.productId}
               onPress={async () => {
                 handleModal();
-                setActiveProduct(e);
+                setLocalActiveProduct(e);
                 const result = await getProductIngredientsLocal(e.productId);
                 console.log(result);
                 console.log(e);
                 console.log('Source:');
-                console.log(activeProduct.filePathInAlbum);
+                console.log(localActiveProduct.filePathInAlbum);
                 setProductIngredients(result);
               }}>
               <View style={styles.productRows}>
@@ -199,9 +218,16 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: 'green',
     margin: 10,
-    width: '40%',
+    width: '35%',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'flex-end',
+  },
+  setActiveButton: {
+    backgroundColor: 'blue',
+    margin: 10,
+    width: '55%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalstyle: {
     backgroundColor: 'white',
@@ -250,6 +276,12 @@ const styles = StyleSheet.create({
     margin: 10,
     color: 'black',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    margin: 10,
+    justifyContent: 'flex-end',
+    height: 100,
+  },
 });
 
-export default Procucts;
+export default Products;

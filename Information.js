@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -20,10 +20,26 @@ import {useBetween} from 'use-between';
 import {useShareableState} from './SharedVariables';
 import Modal from 'react-native-modal';
 import {ScrollView} from 'react-native-gesture-handler';
+import {getProductIngredientsLocal, getProducts} from './Database';
+import {getInformation} from './Services';
+import {Picker} from '@react-native-picker/picker';
+import {Dimensions} from 'react-native';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const Information = () => {
-  const {image, setImage, ingredients, setIngredients} =
-    useBetween(useShareableState);
+  const {
+    image,
+    setImage,
+    ingredients,
+    setIngredients,
+    activeProduct,
+    products,
+    refresh,
+    setProducts,
+    setActiveProduct,
+  } = useBetween(useShareableState);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeIngredient, setactiveIngredient] = useState(null);
 
@@ -31,10 +47,69 @@ const Information = () => {
     setIsModalVisible(() => !isModalVisible);
   };
 
+  let localIngredients = [];
+
+  useEffect(() => {
+    if (activeProduct) {
+      getProductIngredientsLocal(activeProduct.productId)
+        .then(async result => {
+          for (const e of result) {
+            console.log(e['INCI name']);
+            const result2 = await getInformation(e['INCI name']);
+
+            localIngredients.push(result2);
+          }
+          setIngredients(localIngredients);
+        })
+        .catch(error => {
+          console.log(`Unable to load data: ${error.message}`);
+        });
+    }
+  }, [activeProduct]);
+
+  useEffect(() => {
+    getProducts()
+      .then(result => {
+        setProducts(result);
+      })
+      .catch(error => {
+        console.log(`Unable to load data: ${error.message}`);
+      });
+  }, [refresh]);
+
+  const [selectedProduct, setSelectedProduct] = useState();
+
   return (
     <SafeAreaView>
       <StatusBar />
       <ScrollView>
+        {activeProduct ? (
+          <Text style={styles.title}>
+            Selected Product : {activeProduct.fileName}
+          </Text>
+        ) : (
+          <Text style={styles.title}>Selected Product : From picture</Text>
+        )}
+        <View style={styles.selectProduct}>
+          <Text style={styles.h2}>Select product </Text>
+          <Picker
+            style={{flex: 1}}
+            selectedValue={selectedProduct}
+            onValueChange={(itemValue, itemIndexs) => {
+              if (itemIndexs !== 0) {
+                setSelectedProduct(itemValue);
+                setActiveProduct(itemValue);
+              }
+            }}>
+            <Picker.Item label="Please select an option..." key="0" value="0" />
+            {products.map(e => {
+              return (
+                <Picker.Item label={e.fileName} value={e} key={e.productId} />
+              );
+            })}
+          </Picker>
+        </View>
+
         <Modal isVisible={isModalVisible}>
           <View style={styles.modalstyle}>
             {activeIngredient ? (
@@ -70,6 +145,7 @@ const Information = () => {
           </View>
         </Modal>
 
+        <Text style={styles.h2}>Ingredients :</Text>
         <DataTable>
           {ingredients.map(e => {
             return (
@@ -120,6 +196,7 @@ const styles = StyleSheet.create({
     width: '40%',
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 5,
   },
   modalstyle: {
     backgroundColor: 'white',
@@ -140,6 +217,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     margin: 10,
     color: 'black',
+  },
+  h2: {
+    color: 'black',
+    margin: 10,
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  selectProduct: {
+    height: windowHeight * 0.15,
+    width: windowWidth * 1,
   },
 });
 

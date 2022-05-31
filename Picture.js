@@ -76,6 +76,8 @@ const Picture = ({navigation}) => {
     setCategories,
     selectedCategory,
     setSelectedCategory,
+    refresh,
+    setRefresh,
   } = useBetween(useShareableState);
 
   const [image2, setImage2] = useState(null);
@@ -178,6 +180,7 @@ const Picture = ({navigation}) => {
                       onPress: () => {
                         console.log('OK Pressed');
                         navigateToProductsPage();
+                        setRefresh(!refresh);
                       },
                     },
                   ],
@@ -251,12 +254,7 @@ const Picture = ({navigation}) => {
             value={textNewCategory}
             placeholder="Category name"
           />
-          <View
-            style={{
-              flexDirection: 'row',
-              margin: 10,
-              justifyContent: 'flex-end',
-            }}>
+          <View style={styles.buttonContainer}>
             <Button
               style={styles.OkButton}
               onPress={async () => {
@@ -456,7 +454,7 @@ const styles = StyleSheet.create({
   },
   modalstyle: {
     backgroundColor: 'white',
-    height: '35%',
+    height: '40%',
     width: '95%',
     borderRadius: 10,
     flexDirection: 'column',
@@ -474,6 +472,12 @@ const styles = StyleSheet.create({
     width: '40%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    margin: 10,
+    justifyContent: 'flex-end',
+    height: 100,
   },
 });
 
