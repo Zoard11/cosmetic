@@ -48,7 +48,19 @@ const Picture = ({navigation}) => {
           buttonPositive: 'OK',
         },
       );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      const granted2 = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        {
+          title: 'Read permission',
+          message: 'Your permission is required to read the saved ingredients',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (
+        granted === PermissionsAndroid.RESULTS.GRANTED &&
+        granted2 === PermissionsAndroid.RESULTS.GRANTED
+      ) {
         return true;
       }
       Alert.alert(
@@ -124,7 +136,9 @@ const Picture = ({navigation}) => {
     };
     const txtPath = `/storage/emulated/0/Documents/cosmetics/${selectedCategory}`;
 
+    const ingredientsPath = `${txtPath}/${productName}.txt`;
     console.log(txtPath);
+    console.log(ingredientsPath);
 
     return RNFS.mkdir(albumPath)
       .then(() => {
@@ -152,8 +166,7 @@ const Picture = ({navigation}) => {
             message = message.slice(0, -1);
             message += '.';
 
-            const path = `${txtPath}/${productName}.txt`;
-            RNFS.writeFile(path, message, 'utf8');
+            RNFS.writeFile(ingredientsPath, message, 'utf8');
           })
           .then(success => {
             console.log('FILE WRITTEN!');
@@ -167,6 +180,7 @@ const Picture = ({navigation}) => {
               rating,
               filePathInAlbum2,
               description,
+              ingredientsPath,
             ).then(
               function () {
                 clearAllVariables();

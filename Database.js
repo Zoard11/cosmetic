@@ -11,7 +11,7 @@ const db = SQLite.openDatabase(
     db.transaction(
       tx => {
         tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS Products(productId INTEGER PRIMARY KEY AUTOINCREMENT,Category TEXT,fileName TEXT,filePathInAlbum TEXT,rating INTEGER,filePathInAlbum2 TEXT,description TEXT)',
+          'CREATE TABLE IF NOT EXISTS Products(productId INTEGER PRIMARY KEY AUTOINCREMENT,Category TEXT,fileName TEXT,filePathInAlbum TEXT,rating INTEGER,filePathInAlbum2 TEXT,description TEXT,ingredientsPath Text)',
           // 'DROP table ProductIngredients',
           [],
           (trans, results) => {
@@ -71,13 +71,14 @@ export function saveAllData(
   rating,
   filePathInAlbum2,
   description,
+  ingredientsPath,
 ) {
   try {
     return new Promise((resolve, reject) => {
       return db.transaction(
         tx => {
           tx.executeSql(
-            'Insert into Products (Category,fileName,filePathInAlbum,rating,filePathInAlbum2,description) values (?,?,?,?,?,?) ',
+            'Insert into Products (Category,fileName,filePathInAlbum,rating,filePathInAlbum2,description,ingredientsPath) values (?,?,?,?,?,?,?) ',
             [
               selectedCategory,
               productName,
@@ -85,6 +86,7 @@ export function saveAllData(
               rating,
               filePathInAlbum2,
               description,
+              ingredientsPath,
             ],
             (trans, results) => {
               ingredients.forEach(ingredient => {

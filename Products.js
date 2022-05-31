@@ -14,6 +14,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import {DataTable, Button} from 'react-native-paper';
 import {useBetween} from 'use-between';
@@ -23,7 +24,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {getProducts, getProductIngredientsLocal} from './Database';
 import SwiperFlatList from 'react-native-swiper-flatlist';
 import {Rating, AirbnbRating} from 'react-native-ratings';
-import {black} from 'react-native-paper/lib/typescript/styles/colors';
+import Share from 'react-native-share';
 
 const Products = ({navigation}) => {
   const {
@@ -62,6 +63,17 @@ const Products = ({navigation}) => {
   const navigateToInformationPage = () => {
     navigation.navigate('Information');
   };
+
+  //   const onShare = async product => {
+  //     try {
+  //       await Share.share({
+  //         url: `file://${product.ingredientsPath}`,
+  //         title: `${product.fileName}_ingredients`,
+  //       });
+  //     } catch (error) {
+  //       Alert.alert(error.message);
+  //     }
+  //   };
 
   return (
     <SafeAreaView>
@@ -160,16 +172,33 @@ const Products = ({navigation}) => {
           return (
             <TouchableOpacity
               key={e.productId}
+              onLongPress={async () => {
+                try {
+                  Share.open({
+                    title: 'Share ingredients ',
+                    message: `${e.fileName}_ingredients`,
+                    url: `file://${e.ingredientsPath}`,
+                    subject: 'Report',
+                  });
+                } catch (error) {
+                  Alert.alert(error.message);
+                }
+              }}
               onPress={async () => {
-                handleModal();
-                setLocalActiveProduct(e);
-                const result = await getProductIngredientsLocal(e.productId);
-                console.log(result);
-                console.log(e);
-                console.log('Source:');
-                console.log(localActiveProduct.filePathInAlbum);
-                setProductIngredients(result);
-              }}>
+                try {
+                  handleModal();
+                  setLocalActiveProduct(e);
+                  const result = await getProductIngredientsLocal(e.productId);
+                  console.log(result);
+                  console.log(e);
+                  setProductIngredients(result);
+                } catch (error) {
+                  Alert.alert(error.message);
+                }
+              }}
+              // onPress={() => { console.log("onPress") }}
+              //   onLongPress={() => { console.log("onLongPress") }}
+            >
               <View style={styles.productRows}>
                 <Text style={styles.productName}>{e.fileName}</Text>
                 {e.rating > 0 ? (
