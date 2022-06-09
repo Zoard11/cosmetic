@@ -1,12 +1,9 @@
-import {ipAdress} from './constants';
+import {herokuAddress} from './constants';
 
-export function getInformation(name_with_spaces) {
-  return fetch(
-    `http://${ipAdress}:7070/api/getInformation/${name_with_spaces}`,
-    {
-      method: 'GET',
-    },
-  )
+export function getInformation(name) {
+  return fetch(`http://${herokuAddress}/api/getInformation/${name}`, {
+    method: 'GET',
+  })
     .then(response => response.json())
     .then(response => {
       return response;

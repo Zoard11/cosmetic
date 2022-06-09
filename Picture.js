@@ -239,6 +239,7 @@ const Picture = ({navigation}) => {
     selectCategories()
       .then(result => {
         setCategories(result);
+        console.log(result);
         if (categories._W) {
           setLocalCategories(categories._W);
         } else {

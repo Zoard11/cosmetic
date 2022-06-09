@@ -95,7 +95,7 @@ const Products = ({navigation}) => {
                     </Text>
                   </View>
                   <Text style={styles.title}>Pictures</Text>
-                  <View style={styles.container}>
+                  <View>
                     {localActiveProduct.filePathInAlbum2 !== '' ? (
                       <SwiperFlatList
                         autoplay
@@ -178,7 +178,7 @@ const Products = ({navigation}) => {
                     title: 'Share ingredients ',
                     message: `${e.fileName}_ingredients`,
                     url: `file://${e.ingredientsPath}`,
-                    subject: 'Report',
+                    subject: 'Ingredients',
                   });
                 } catch (error) {
                   Alert.alert(error.message);
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     paddingBottom: 1100,
   },
   imageInSwiper: {
-    width: 230,
+    width: 320,
     height: 300,
   },
   productRows: {
