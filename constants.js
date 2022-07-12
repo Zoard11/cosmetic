@@ -1,1 +1,1 @@
-export const herokuAddress = 'cosmetic-ingredients-1.herokuapp.com';
+export const ipAddress = '192.168.1.3:8080';

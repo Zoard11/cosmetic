@@ -1,7 +1,7 @@
-import {herokuAddress} from './constants';
+import {ipAddress} from './constants';
 
 export function getInformation(name) {
-  return fetch(`http://${herokuAddress}/api/getInformation/${name}`, {
+  return fetch(`http://${ipAddress}/api/getInformation/${name}`, {
     method: 'GET',
   })
     .then(response => response.json())
