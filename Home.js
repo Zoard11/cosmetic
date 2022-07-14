@@ -91,6 +91,7 @@ const Home = ({navigation}) => {
         setRefresh(!refresh);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image]);
 
   return (

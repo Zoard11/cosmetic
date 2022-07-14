@@ -65,6 +65,7 @@ const Information = () => {
           console.log(`Unable to load data: ${error.message}`);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProduct]);
 
   useEffect(() => {
@@ -75,6 +76,7 @@ const Information = () => {
       .catch(error => {
         console.log(`Unable to load data: ${error.message}`);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
   const [selectedProduct, setSelectedProduct] = useState();

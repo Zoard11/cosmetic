@@ -21,10 +21,15 @@ import {useBetween} from 'use-between';
 import {useShareableState} from './SharedVariables';
 import Modal from 'react-native-modal';
 import {ScrollView} from 'react-native-gesture-handler';
-import {getProducts, getProductIngredientsLocal} from './Database';
+import {
+  getProducts,
+  getProductIngredientsLocal,
+  deleteProductLocalById,
+} from './Database';
 import SwiperFlatList from 'react-native-swiper-flatlist';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import Share from 'react-native-share';
+import Swipeout from 'react-native-swipeout';
 
 const Products = ({navigation}) => {
   const {
@@ -39,6 +44,7 @@ const Products = ({navigation}) => {
     productIngredients,
     setProductIngredients,
     refresh,
+    setRefresh,
   } = useBetween(useShareableState);
 
   useEffect(() => {
@@ -51,6 +57,7 @@ const Products = ({navigation}) => {
       .catch(error => {
         console.log(`Unable to load data: ${error.message}`);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -64,16 +71,22 @@ const Products = ({navigation}) => {
     navigation.navigate('Information');
   };
 
-  //   const onShare = async product => {
-  //     try {
-  //       await Share.share({
-  //         url: `file://${product.ingredientsPath}`,
-  //         title: `${product.fileName}_ingredients`,
-  //       });
-  //     } catch (error) {
-  //       Alert.alert(error.message);
-  //     }
-  //   };
+  const swipeButtons = id => [
+    {
+      text: 'Delete',
+      backgroundColor: 'red',
+      underlayColor: 'rgba(0, 0, 0, 1, 0.6)',
+      onPress: async () => {
+        try {
+          console.log(id);
+          await deleteProductLocalById(id);
+          setRefresh(!refresh);
+        } catch (error) {
+          Alert.alert(error.message);
+        }
+      },
+    },
+  ];
 
   return (
     <SafeAreaView>
@@ -167,55 +180,58 @@ const Products = ({navigation}) => {
             </View>
           </View>
         </Modal>
-
         {products.map(e => {
           return (
-            <TouchableOpacity
-              key={e.productId}
-              onLongPress={async () => {
-                try {
-                  Share.open({
-                    title: 'Share ingredients ',
-                    message: `${e.fileName}_ingredients`,
-                    url: `file://${e.ingredientsPath}`,
-                    subject: 'Ingredients',
-                  });
-                } catch (error) {
-                  Alert.alert(error.message);
-                }
-              }}
-              onPress={async () => {
-                try {
-                  handleModal();
-                  setLocalActiveProduct(e);
-                  const result = await getProductIngredientsLocal(e.productId);
-                  console.log(result);
-                  console.log(e);
-                  setProductIngredients(result);
-                } catch (error) {
-                  Alert.alert(error.message);
-                }
-              }}
-              // onPress={() => { console.log("onPress") }}
-              //   onLongPress={() => { console.log("onLongPress") }}
-            >
-              <View style={styles.productRows}>
-                <Text style={styles.productName}>{e.fileName}</Text>
-                {e.rating > 0 ? (
-                  <View style={styles.rightSide}>
-                    <AirbnbRating
-                      type="star"
-                      ratingCount={5}
-                      defaultRating={e.rating}
-                      showRating={false}
-                      isDisabled={true}
-                    />
-                  </View>
-                ) : (
-                  <View style={styles.rightSide} />
-                )}
-              </View>
-            </TouchableOpacity>
+            <Swipeout
+              right={swipeButtons(e.productId)}
+              autoClose="true"
+              backgroundColor="transparent">
+              <TouchableOpacity
+                key={e.productId}
+                onLongPress={async () => {
+                  try {
+                    Share.open({
+                      title: 'Share ingredients ',
+                      message: `${e.fileName}_ingredients`,
+                      url: `file://${e.ingredientsPath}`,
+                      subject: 'Ingredients',
+                    });
+                  } catch (error) {
+                    Alert.alert(error.message);
+                  }
+                }}
+                onPress={async () => {
+                  try {
+                    handleModal();
+                    setLocalActiveProduct(e);
+                    const result = await getProductIngredientsLocal(
+                      e.productId,
+                    );
+                    console.log(result);
+                    console.log(e);
+                    setProductIngredients(result);
+                  } catch (error) {
+                    Alert.alert(error.message);
+                  }
+                }}>
+                <View style={styles.productRows}>
+                  <Text style={styles.productName}>{e.fileName}</Text>
+                  {e.rating > 0 ? (
+                    <View style={styles.rightSide}>
+                      <AirbnbRating
+                        type="star"
+                        ratingCount={5}
+                        defaultRating={e.rating}
+                        showRating={false}
+                        isDisabled={true}
+                      />
+                    </View>
+                  ) : (
+                    <View style={styles.rightSide} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            </Swipeout>
           );
         })}
       </ScrollView>
@@ -295,7 +311,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   rightSide: {
-    alignItems: 'flex-end',
+    marginLeft: 'auto',
   },
   productName: {
     margin: 10,

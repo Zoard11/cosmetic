@@ -228,3 +228,29 @@ export function addNewCategory(NewCategory) {
     console.log(error);
   }
 }
+
+export function deleteProductLocalById(id) {
+  try {
+    return new Promise((resolve, reject) => {
+      return db.transaction(
+        tx => {
+          tx.executeSql(
+            'Delete from Products where productId=? ',
+            [id],
+            (trans, results) => {
+              return resolve();
+            },
+          );
+        },
+        error => {
+          console.log('Transaction error delete local product');
+          console.log(error);
+          return reject(error);
+        },
+      );
+    });
+  } catch (error) {
+    console.log('Error');
+    console.log(error);
+  }
+}

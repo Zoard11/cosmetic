@@ -249,6 +249,7 @@ const Picture = ({navigation}) => {
       .catch(error => {
         console.log(`Unable to load data: ${error.message}`);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -276,7 +277,7 @@ const Picture = ({navigation}) => {
                 await addNewCategory(textNewCategory);
                 setCategories(await selectCategories());
                 setLocalCategories(categories);
-                setLocalCategories(localCategories => [
+                setLocalCategories(newLocalCategories => [
                   ...localCategories,
                   {CategoryName: textNewCategory},
                 ]);
@@ -299,15 +300,15 @@ const Picture = ({navigation}) => {
               <Image source={image.assets} style={styles.image} />
             </View>
 
-            <View style={{height: '20%', width: '100%'}}>
-              <View style={{flexDirection: 'row'}}>
+            <View style={styles.category}>
+              <View style={styles.row}>
                 <Text style={styles.h2}>Select Category </Text>
                 <TouchableOpacity onPress={handleModal}>
                   <Text style={styles.h2}>Add new category </Text>
                 </TouchableOpacity>
               </View>
               <Picker
-                style={{flex: 1}}
+                style={styles.picker}
                 selectedValue={selectedCategory}
                 onValueChange={(itemValue, itemIndexs) => {
                   if (itemIndexs !== 0) {
@@ -493,6 +494,16 @@ const styles = StyleSheet.create({
     margin: 10,
     justifyContent: 'flex-end',
     height: 100,
+  },
+  picker: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  category: {
+    height: '20%',
+    width: '100%',
   },
 });
 
