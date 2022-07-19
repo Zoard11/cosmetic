@@ -1,7 +1,7 @@
 import {ipAddress} from './constants';
 
 export function getInformation(name) {
-  return fetch(`${ipAddress}/api/getInformation/${name}`, {
+  return fetch(`${ipAddress}/api/${name}`, {
     method: 'GET',
   })
     .then(response => response.json())
