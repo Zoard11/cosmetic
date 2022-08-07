@@ -250,7 +250,7 @@ const Picture = ({navigation}) => {
         console.log(`Unable to load data: ${error.message}`);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isModalVisible]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
