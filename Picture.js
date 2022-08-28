@@ -22,14 +22,12 @@ import {Button} from 'react-native-paper';
 
 import {useBetween} from 'use-between';
 import {useShareableState} from './SharedVariables';
-import RNPickerSelect from 'react-native-picker-select';
 import {Picker} from '@react-native-picker/picker';
 import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
 import RNFS from 'react-native-fs';
-import CameraRoll from '@react-native-community/cameraroll';
 import {addNewCategory, saveAllData, selectCategories} from './Database';
 import {Dimensions} from 'react-native';
-import {Rating, AirbnbRating} from 'react-native-ratings';
+import {AirbnbRating} from 'react-native-ratings';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import Modal from 'react-native-modal';
 
@@ -225,14 +223,7 @@ const Picture = ({navigation}) => {
   };
 
   const buttonPressTakePicture = () => {
-    const options = {
-      // saveToPhotos: true,
-      // storageOptions: {
-      //   skipBackup: true,
-      //   path: 'images',
-      // },
-    };
-    launchCamera(options, setImage2);
+    launchCamera({}, setImage2);
   };
 
   useEffect(() => {

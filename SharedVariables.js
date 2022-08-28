@@ -1,5 +1,4 @@
 import {useState} from 'react';
-import {selectCategories} from './Database';
 
 export const useShareableState = () => {
   const [image, setImage] = useState(null);

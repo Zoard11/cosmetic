@@ -4,7 +4,6 @@ const db = SQLite.openDatabase(
   {
     name: 'incidatabase',
     createFromLocation: 1,
-    // createFromLocation: '~www/incidatabase.db',
   },
   () => {
     console.log('Open database!');
@@ -12,7 +11,6 @@ const db = SQLite.openDatabase(
       tx => {
         tx.executeSql(
           'CREATE TABLE IF NOT EXISTS Products(productId INTEGER PRIMARY KEY AUTOINCREMENT,Category TEXT,fileName TEXT,filePathInAlbum TEXT,rating INTEGER,filePathInAlbum2 TEXT,description TEXT,ingredientsPath Text)',
-          // 'DROP table ProductIngredients',
           [],
           (trans, results) => {
             console.log('Table created succesfully!');
@@ -122,7 +120,6 @@ export function getProducts() {
             let rows = [];
             for (let i = 0; i < results.rows.length; i++) {
               rows.push(results.rows.item(i));
-              // console.log(row);
             }
             return resolve(rows);
           });
@@ -149,11 +146,9 @@ export function getProductIngredientsLocal(productId) {
             'SELECT * FROM ProductIngredients Where ProductIngredients.productId=?',
             [productId],
             (trans, results) => {
-              console.log('getProducts===');
               let rows = [];
               for (let i = 0; i < results.rows.length; i++) {
                 rows.push(results.rows.item(i));
-                // console.log(row);
               }
               return resolve(rows);
             },
@@ -184,7 +179,6 @@ export function selectCategories() {
               let rows = [];
               for (let i = 0; i < results.rows.length; i++) {
                 rows.push(results.rows.item(i));
-                // console.log(row);
               }
               console.log(rows);
               return resolve(rows);

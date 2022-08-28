@@ -27,19 +27,14 @@ import {
   deleteProductLocalById,
 } from './Database';
 import SwiperFlatList from 'react-native-swiper-flatlist';
-import {Rating, AirbnbRating} from 'react-native-ratings';
+import {AirbnbRating} from 'react-native-ratings';
 import Share from 'react-native-share';
 import Swipeout from 'react-native-swipeout';
 
 const Products = ({navigation}) => {
   const {
-    image,
-    setImage,
-    ingredients,
-    setIngredients,
     products,
     setProducts,
-    activeProduct,
     setActiveProduct,
     productIngredients,
     setProductIngredients,

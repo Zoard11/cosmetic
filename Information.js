@@ -30,8 +30,6 @@ const windowHeight = Dimensions.get('window').height;
 
 const Information = () => {
   const {
-    image,
-    setImage,
     ingredients,
     setIngredients,
     activeProduct,
@@ -95,7 +93,7 @@ const Information = () => {
         <View style={styles.selectProduct}>
           <Text style={styles.h2}>Select product </Text>
           <Picker
-            style={{flex: 1}}
+            style={styles.picker}
             selectedValue={selectedProduct}
             onValueChange={(itemValue, itemIndexs) => {
               if (itemIndexs !== 0) {
@@ -229,6 +227,9 @@ const styles = StyleSheet.create({
   selectProduct: {
     height: windowHeight * 0.15,
     width: windowWidth * 1,
+  },
+  picker: {
+    flex: 1,
   },
 });
 

@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {SafeAreaView, Text, View, StatusBar, StyleSheet} from 'react-native';
 import {Button} from 'react-native-paper';
 import TextRecognition from 'react-native-text-recognition';
@@ -32,14 +32,7 @@ const Home = ({navigation}) => {
   };
 
   const buttonPress2 = () => {
-    const options = {
-      // saveToPhotos: true,
-      // storageOptions: {
-      //   skipBackup: true,
-      //   path: 'images',
-      // },
-    };
-    launchCamera(options, setImage);
+    launchCamera({}, setImage);
   };
 
   const navigateToInformationPage = () => {
